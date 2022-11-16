@@ -1,0 +1,169 @@
+swagger: '2.0'
+info:
+  version: '1.0.0'
+  title: E-Food
+schemes: [http]
+host: e-food.com
+basePath: /v1
+consumes: [application/json]
+produces: [application/json]
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+  AppID:
+    type: apiKey
+    name: X-App-ID
+    in: header
+security:
+  - AppID: []
+paths:
+  /register:
+    post:
+      tags: [user]
+      summary: 'Register a new user to the app'
+      description: 'Register the new user and return the success notification'
+      operationId: Register
+      parameters:
+        - name: 'register'
+          in: 'body'
+          required: true
+          description: 'Register Payload'
+          schema:
+            $ref: '#/definitions/Register'
+      responses:
+        200:
+          description: Successful register
+          schema:
+            $ref: '#/definitions/RegisterSuccess'
+        400:
+          description: Bad Request
+        404:
+          schema:
+            type: string
+          description: User not found
+        500:
+          schema:
+            type: string
+          description: Server error
+  /login:
+    post:
+      tags: [user]
+      summary: 'Get authorization token for the app'
+      description: 'Returns token for authorized User'
+      operationId: Login
+      parameters:
+        - name: 'login'
+          in: 'body'
+          required: true
+          description: 'Login Payload'
+          schema:
+            $ref: '#/definitions/LoginInfo'
+      responses:
+        200:
+          description: Successful login
+          schema:
+            $ref: '#/definitions/LoginSuccess'
+        400:
+          description: Bad Request
+        404:
+          schema:
+            type: string
+          description: User not found
+        500:
+          schema:
+            type: string
+          description: Server error
+  /categories:
+    get:
+      tags: [menu]
+      summary: 'Get menu items for the app'
+      description: 'It returns a list of nested objects which contains all categories and sub-categories required to create menu'
+      operationId: CategoryList
+      security:
+        - Bearer: []
+          AppID: []
+      responses:
+        200:
+          description: 'List of Categories'
+          schema:
+            $ref: '#/definitions/Categories'
+        400:
+          description: Bad Request
+        404:
+          description: Categories Not Found
+        500:
+          schema:
+            type: string
+          description: Server Error
+parameters:
+  AppID:
+    name: X-App-ID
+    in: header
+    type: string
+    description: 'Identifier of app that request APIs'
+    required: true
+definitions:
+  Categories:
+    type: array
+    items:
+      $ref: '#/definitions/Category'
+  Category:
+    type: object
+    properties:
+      bcId:
+        type: integer
+      bcName:
+        type: string
+      bcImageUrl:
+        type: string
+      bcIsActive:
+        type: boolean
+      subCategories:
+        type: array
+        items:
+          $ref: '#/definitions/SubCategory'
+  SubCategory:
+    type: object
+    properties:
+      scId:
+        type: integer
+      scName:
+        type: string
+      scImageUrl:
+        type: string
+      scIsActive:
+        type: boolean
+  Register:
+    type: object
+    required: [email,name,password]
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+  RegisterSuccess:
+    type: object
+    properties:
+      success:
+        type: boolean
+      message:
+        type: string
+  LoginInfo:
+    type: object
+    required: [email,password]
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+  LoginSuccess:
+    type: object
+    properties:
+      success:
+        type: boolean
+      token:
+        type: string
